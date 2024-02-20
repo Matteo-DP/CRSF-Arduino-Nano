@@ -1,58 +1,48 @@
 #include <Arduino.h>
+#include "CRSF.h"
+#include "controller.cpp"
 #include "config.h"
 
-class Controller {
-    public:
-        int speedLeft = 0; // Unmapped left motor speed from axis
-        int speedRight = 0; // Unmapped right motor speed from axis
-        int sensitivity = SENSITIVITY;
-        int motorLeft; // Left motor speed (0 - 255)
-        int motorRight; // Right motor speed (0 - 255)
+CRSF crsf;
+Controller controller;
 
-        // Difference calculations
-        int lastThrottleValue = 0;
-        int lastSteerLeftValue = 0;
-        int lastSteerRightValue = 0;
+void setup(){
+  crsf.begin();
+  Serial.begin(420000);
+  pinMode(LED_BUILTIN, OUTPUT);
+}
 
-        void throttle(int throttleValue) {
-            int difference = throttleValue - lastThrottleValue;
-            if(difference == 0) return; // Dont do anything when nothing changed
+void loop(){
+  crsf.GetCrsfPacket();
 
-            speedLeft += difference;
-            speedRight += difference;
+  // Turn indicator light on.
+  if(crsf.failsafe_status == CRSF_SIGNAL_LOST){
+    digitalWrite(LED_BUILTIN, 1);
+  }else{
+    digitalWrite(LED_BUILTIN, 0);
+  }
 
-            lastThrottleValue = throttleValue;
-        };
-        void steerLeft(int steerLeftValue) {
-            // Assumes that steerLeftValue is positive
-            int difference = steerLeftValue - lastSteerLeftValue;
-            if(difference == 0) return; // Dont do anything when nothing changed
+  crsf.UpdateChannels();
 
-            speedLeft -= difference * sensitivity;
-            speedRight += difference * sensitivity;
+  #ifdef CRSFDEBUG
+    Serial.print(crsf.channels[0]); 
+    Serial.print(" ");
+    Serial.print(crsf.channels[1]); 
+    Serial.print(" ");
+    Serial.print(crsf.channels[2]); 
+    Serial.println();
+  #endif
 
-            lastSteerLeftValue = steerLeftValue;
-        };
-        void steerRight(int steerRightValue) {
-            // Assumes that steerRightValue is positive
-            int difference = steerRightValue - lastSteerRightValue;
-            if(difference == 0) return; // Dont do anything when nothing changed
+  controller.throttle(crsf.channels[2]);
+  controller.steer(crsf.channels[0]);
+  controller.update();
 
-            speedLeft += steerRightValue * sensitivity;
-            speedRight -= steerRightValue * sensitivity;
-
-            lastSteerRightValue = steerRightValue;
-        };
-        void update() {
-            if(speedLeft < STEERMIN) {
-                speedLeft = STEERMIN;
-            } else if(speedLeft > STEERMAX) {
-                speedLeft = STEERMAX;
-            };
-
-            motorLeft = map(speedLeft, STEERMIN, STEERMAX, 0, 255);
-            motorRight = map(speedRight, STEERMIN, STEERMAX, 0, 255);
-            analogWrite(MOTORLEFTPIN, motorLeft);
-            analogWrite(MOTORRIGHTPIN, motorRight);
-        };
-} controller;
+  #ifdef DEBUG
+    Serial.print(controller.motorLeft); 
+    Serial.print(" ");
+    Serial.print(controller.motorRight); 
+    Serial.println();
+  #endif
+  
+  delay(5);
+}

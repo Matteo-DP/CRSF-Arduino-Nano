@@ -16,7 +16,6 @@ class Controller
         int sensitivity = SENSITIVITY;
         int motorLeft; // Left motor speed (0 - 255)
         int motorRight; // Right motor speed (0 - 255)
-
         // Difference calculations
         int lastThrottleValue = 0;
         int lastSteerLeftValue = 0;
@@ -84,8 +83,8 @@ class Controller
                 speedRight = CRSF_CHANNEL_MAX;
             };
 
-            motorLeft = map(speedLeft, CRSF_CHANNEL_MIN, CRSF_CHANNEL_MAX, 0, 255);
-            motorRight = map(speedRight, CRSF_CHANNEL_MIN, CRSF_CHANNEL_MAX, 0, 255);
+            motorLeft = map(speedLeft, CRSF_CHANNEL_MIN, CRSF_CHANNEL_MAX, 0, 255) / DIVIDE;
+            motorRight = map(speedRight, CRSF_CHANNEL_MIN, CRSF_CHANNEL_MAX, 0, 255) / DIVIDE;
             analogWrite(MOTORLEFTPIN, motorLeft);
             analogWrite(MOTORRIGHTPIN, motorRight);
         };

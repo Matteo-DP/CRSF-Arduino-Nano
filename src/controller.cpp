@@ -108,6 +108,11 @@ class Controller
                 return; // Error
             }
         }
+        void panic() {
+            // Stop motors
+            analogWrite(MOTORLEFTPIN, 0);
+            analogWrite(MOTORRIGHTPIN, 0);
+        };
 };
 
 #endif

@@ -35,33 +35,30 @@ void loop(){
   crsf.GetCrsfPacket();
 
   // Turn indicator light on.
-  if(crsf.failsafe_status == CRSF_SIGNAL_LOST){
-    digitalWrite(LED_BUILTIN, 1); // Error LED
-  }else{
-    // If signal is good, start processing the channels for motor control
-    digitalWrite(LED_BUILTIN, 0);
-    crsf.UpdateChannels();
+  Serial.println(crsf.failsafe_status);
+  // If signal is good, start processing the channels for motor control
+  digitalWrite(LED_BUILTIN, 0);
+  crsf.UpdateChannels();
 
-    #ifdef CRSFDEBUG
-      Serial.print(crsf.channels[0]); 
-      Serial.print(" ");
-      Serial.print(crsf.channels[1]); 
-      Serial.print(" ");
-      Serial.print(crsf.channels[2]); 
-      Serial.println();
-    #endif
+  #ifdef CRSFDEBUG
+    Serial.print(crsf.channels[0]); 
+    Serial.print(" ");
+    Serial.print(crsf.channels[1]); 
+    Serial.print(" ");
+    Serial.print(crsf.channels[2]); 
+    Serial.println();
+  #endif
 
-    controller.throttle(crsf.channels[2]);
-    controller.steer(crsf.channels[0]);
-    controller.update();
+  controller.throttle(crsf.channels[2]);
+  controller.steer(crsf.channels[0]);
+  controller.update();
 
-    #ifdef DEBUG
-      Serial.print(controller.motorLeft); 
-      Serial.print(" ");
-      Serial.print(controller.motorRight); 
-      Serial.println();
-    #endif
-  };
+  #ifdef DEBUG
+    Serial.print(controller.motorLeft); 
+    Serial.print(" ");
+    Serial.print(controller.motorRight); 
+    Serial.println();
+  #endif
 
   delay(5);
 }

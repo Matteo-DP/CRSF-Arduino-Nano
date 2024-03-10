@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 // Enable debug mode: no PWM output, only serial output
-#define DEBUG
+//#define DEBUG
 // Enable CRSF debug mode: show raw CRSF ch values
 // #define CRSFDEBUG
 
